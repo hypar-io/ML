@@ -1,0 +1,17 @@
+{
+  "name": "input_generation",
+  "version": "1.0.0",
+  "description": "Samples the input domain of a Hypar function",
+  "scripts": {
+    "ts-node": "ts-node"
+  },
+  "author": "matt@hypar.io",
+  "license": "MIT",
+  "dependencies": {
+    "ts-node": "^8.9.0",
+    "typescript": "^3.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.17"
+  }
+}
