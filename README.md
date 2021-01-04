@@ -2,8 +2,6 @@
 
 Tools for training and deploying models on [Hypar](https://hypar.io).
 
-The Hypar command line interface (CLI) enables you to run a Hypar function locally with many input sets to generate a set of 3D models in glTF. Using the utilities in `/input_generation` you can then generate images from those models. The generated images and the input sets are suitable to be used to train a machine learning model using popular frameworks like PyTorch.
-
 **Glossary**
 - Function - A Hypar function. Locally, this is a directory containing a `hypar.json` file and a function's code. On Hypar's web application, functions are added to workflows.
 - Workflow - A set of functions that execute on Hypar's web application.
