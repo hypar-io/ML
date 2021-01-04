@@ -12,9 +12,10 @@ Tools for training and deploying models on [Hypar](https://hypar.io).
 - Follow the [Things You Need](https://hypar-io.github.io/Elements/C-Sharp.html#things-youll-need) section in the Getting Started guide to install the prerequisites to build and run a Hypar function.
 - Install the Hypar command line interface (CLI). In [Installing and Using the Command Line Interface](https://hypar-io.github.io/Elements/C-Sharp.html#installing-and-using-the-hypar-command-line-interface-cli) you may need to install an alpha release of the CLI as new features are added. To do so, you can do:
   ```bash
-  dotnet tool install -g hypar.cli --version 0.8.1-alpha8
+  dotnet tool install -g hypar.cli --version [VERSION]
   ```
-  Note: You'll want to update the alpha tag to the latest version.
+  Where:
+    - `[VERSION]` is the latest alpha version available [here](https://www.nuget.org/packages/Hypar.CLI/).
 - Create a workflow using Hypar's web application that will generate an input model that provides the data required by your function. 
   - For example, if you are using Hypar's Facade function to generate a facade, you'll need a workflow that generates an envelope and some levels. You will not need to add the facade function to that workflow. The facade function will be run locally.
 - Export the workflow from Hypar using `More -> Export -> glTF`.
