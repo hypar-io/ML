@@ -80,7 +80,10 @@ Object.keys(parameters).forEach(key => {
             case 'https://hypar.io/Schemas/Geometry/Color.json':
                 options[key] = [{
                     discriminator: 'Elements.Geometry.Color',
-                    Color: { Red: 1.0, Green: 1.0, Blue: 1.0, Alpha: 1.0 }
+                    Red: 1.0,
+                    Green: 1.0,
+                    Blue: 1.0,
+                    Alpha: 1.0
                 }]
                 break
             default:
