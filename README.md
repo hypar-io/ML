@@ -19,5 +19,4 @@ Tools for training and deploying models on [Hypar](https://hypar.io).
 - Create a workflow using Hypar's web application that will generate an input model that provides the data required by your function. 
   - For example, if you are using Hypar's Facade function to generate a facade, you'll need a workflow that generates an envelope and some levels. You will not need to add the facade function to that workflow. The facade function will be run locally.
 - Export the workflow from Hypar using `More -> Export -> glTF`.
-- The file path to the input model can now be included in the `ModelInputKeys` property of the input file. If you'd like to use different input models, you can save them as distinct glTF files and reference them individually in the input file.
 - Follow the instructions in https://github.com/hypar-io/ML/tree/master/input_generation/ to generate an input file for the function and execute the function using the input file.
