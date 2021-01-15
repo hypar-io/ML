@@ -14,12 +14,13 @@ Run `npm install` inside this directory to fetch all remaining dependencies.
 
 Run the following command to sample a function's input domain:
 ```
-npm run ts-node generateBatchInput.ts [HYPAR_JSON] [OUTPUT_JSON]
+npm run ts-node generateBatchInput.ts [HYPAR_JSON] [OUTPUT_JSON] [INPUT_MODEL]
 ```
 
 Where:
 * `[HYPAR_JSON]` is the path to a `hypar.json` Hypar function spec, which is found within the top level of a function's source code directory.
 * `[OUTPUT_JSON]` is the path to the batch input spec file that will be created. The filename must end in `.json`.
+* `[INPUT_MODEL]` is the path to the input model containing the function's model dependencies.
 
 ## Running a function across a batch input spec
 
