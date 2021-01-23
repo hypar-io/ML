@@ -22,3 +22,9 @@ npm run ts-node generateImages.ts [INPUT_DIRECTORY] [OUTPUT_DIRECTORY]
 Where:
 * `[INPUT_DIRECTORY]` is the path to a directory containing .glb files
 * `[OUTPUT_DIRECTORY]` is the path where output .png files will be written.
+
+A camera angle can be passed as a last argument, as a right-handed vector. This creates top-down screenshots:
+
+```
+npm run ts-node generateImages.ts [INPUT_DIRECTORY] [OUTPUT_DIRECTORY] "0, 0, -1.0"
+```

@@ -1,37 +1,41 @@
+import { exit } from "process"
+
 const { exec, execSync } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 const puppeteer = require('puppeteer')
 
 const args = process.argv.slice(2)
-if (args.length != 2) {
-    console.error('Must provide a directory of .glb files and an output directory')
-    process.exit()
+if (args.length < 2) {
+	console.error('Must provide a directory of .glb files and an output directory')
+	process.exit()
 }
 
 const inputDirectory = path.resolve(args[0])
 if (!fs.existsSync(inputDirectory)) {
-    console.error('Input directory does not exist: ', inputDirectory)
-    process.exit()
+	console.error('Input directory does not exist: ', inputDirectory)
+	process.exit()
 }
 const outputDirectory = path.resolve(args[1])
-if (!fs.existsSync(outputDirectory)){
-    fs.mkdirSync(outputDirectory, { recursive: true })
+if (!fs.existsSync(outputDirectory)) {
+	fs.mkdirSync(outputDirectory, { recursive: true })
 }
+
+const cameraAngle = args.length > 2 ? args[2] : '1,0.1,0.1'
 
 // Start a file server for the GLBs so that the web context can fetch them.
 const serverPath = path.resolve('cors_simple_server.py')
 process.chdir(inputDirectory)
 const glbServerPort = 8000
 exec(`python ${serverPath} ${glbServerPort}`, (err, stdout, stderr) => {
-  if (err) {
-    console.error(err)
-    return
-  }
+	if (err) {
+		console.error(err)
+		return
+	}
 
-  // the *entire* stdout and stderr (buffered)
-  console.log(`stdout: ${stdout}`)
-  console.log(`stderr: ${stderr}`)
+	// the *entire* stdout and stderr (buffered)
+	console.log(`stdout: ${stdout}`)
+	console.log(`stderr: ${stderr}`)
 })
 console.log(`GLB server listening on port ${glbServerPort}`)
 
@@ -40,7 +44,7 @@ const width = 256
 const height = 256
 let browser = null
 const screenshotGltf = async (glbName: string, targetName: string) => {
-	return new Promise(async (resolve, reject) => {
+	return new Promise<void>(async (resolve, reject) => {
 		if (!browser) {
 			browser = await puppeteer.launch({
 				ignoreHTTPSErrors: true,
@@ -64,13 +68,13 @@ const screenshotGltf = async (glbName: string, targetName: string) => {
 		await page.exposeFunction('onModelLoaded', e => {
 			console.log('Capturing screenshot.')
 			page.screenshot({ path: targetName }).then(async () => {
-                await page.close()
-                resolve()
-            })
-            .catch(async () => {
-                await page.close()
-                reject()
-            })
+				await page.close()
+				resolve()
+			})
+				.catch(async () => {
+					await page.close()
+					reject()
+				})
 		})
 		await page.evaluateOnNewDocument(() => {
 			document.addEventListener('model-loaded', () => {
@@ -78,14 +82,14 @@ const screenshotGltf = async (glbName: string, targetName: string) => {
 			})
 		})
 
-		await page.goto(`https://hypar.io/render?url=http://localhost:${glbServerPort}/${glbName}`)
+		await page.goto(`https://hypar.io/render?url=http://localhost:${glbServerPort}/${glbName}&direction=${cameraAngle}`)
 	})
 }
 
 
 // Iterate over all .glb files and take a screenshot.
 const processFile = (filePath: string) => {
-	return new Promise((resolve, reject) => {
+	return new Promise<void>((resolve, reject) => {
 		console.log('Processing', filePath)
 		const inPath = path.basename(filePath)
 		const outPath = path.join(outputDirectory, path.basename(filePath, '.glb') + '.png')
