@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 
 const args = process.argv.slice(2)
-if (args.length != 2) {
+if (args.length < 2) {
     console.error('You must provide a path to a hypar.json, and a target output path.')
     process.exit()
 }
@@ -21,18 +21,32 @@ if (path.extname(targetFile) != '.json') {
 
 const configFile = JSON.parse(fs.readFileSync(hyparConfigPath))
 
-// TODO: Expand this to support multiple model import keys. Currently,
-// All model import keys will be set to the same model.
+// The optional third argument specifies dependencies on other functions' outputs.
+// If the argument is a JSON object, it's a map from dependency name to JSON file paths.
+// If the argument is a path to a .json file model, all import keys will be set to this model.
 var modelInputKeys = null
 if (args.length > 2) {
-    const inputModel = args[2]
-    if (path.extname(inputModel) != '.json') {
-        console.error(`Input model must be a .json file. Currently: ${inputModel}`)
-        process.exit()
+    const modelArg = args[2]
+    if (modelArg.includes('{')) {
+        modelInputKeys = JSON.parse(modelArg)
+    } else {
+        if (path.extname(modelArg) != '.json') {
+            console.error(`Input model must be a .json file or a JSON object. Currently: ${modelArg}`)
+            process.exit()
+        }
+        modelInputKeys = {}
+        if (configFile.model_dependencies) {
+            configFile.model_dependencies.map((md) => (modelInputKeys[md.name] = modelArg))
+        }
     }
-    modelInputKeys = {}
-    if (configFile.model_dependencies) {
-        configFile.model_dependencies.map((md) => (modelInputKeys[md.name] = inputModel))
+}
+if (configFile.model_dependencies) {
+    const missingDependencies = configFile.model_dependencies.filter((dep) => !dep.optional && (!modelInputKeys || !(dep.name in modelInputKeys)))
+    if (missingDependencies.length > 0) {
+        const missingNames = missingDependencies.map((dep) => dep.name)
+        missingNames.sort()
+        console.error(`No input models were given for required model dependencies: ${missingNames.join(', ')}`)
+        process.exit()
     }
 }
 
