@@ -98,13 +98,26 @@ if (configFile.inputs) {
         // Parameters that are built-in like number and string.
         if (param.type) {
             switch (param.type) {
+                case 'boolean':
+                    options[key] = [true, false]
+                    break
                 case 'number':
                     const rangeLength = Math.floor((param.maximum - param.minimum) / param.step) + 1
                     const fullRange = Array.from({ length: rangeLength }, (_, i) => param.minimum + (i * param.step))
                     options[key] = evenlyDistributedSubset(fullRange, Math.min(maxOptionsPerParam, fullRange.length))
                     break
+                case 'string':
+                    if (!param.enum) {
+                        throw new Error(`Cannot generate options for strings without enum values (${key})`)
+                    }
+                    options[key] = evenlyDistributedSubset(param.enum, Math.min(maxOptionsPerParam, param.enum))
+                    break
                 default:
-                    throw new Error(`Cannot generate options for param type ${param.type} (${key})`)
+                    if (param.default) {
+                        options[key] = [param.default]
+                    } else {
+                        throw new Error(`Cannot generate options for param type ${param.type} (${key})`)
+                    }
             }
             // Parameters that defined by schemas.
         } else if (param.$ref) {
