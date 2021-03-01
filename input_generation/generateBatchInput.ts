@@ -95,32 +95,8 @@ if (configFile.inputs) {
     Object.keys(parameters).forEach(key => {
         const param = parameters[key]
 
-        // Parameters that are built-in like number and string.
-        if (param.type) {
-            switch (param.type) {
-                case 'boolean':
-                    options[key] = [true, false]
-                    break
-                case 'number':
-                    const rangeLength = Math.floor((param.maximum - param.minimum) / param.step) + 1
-                    const fullRange = Array.from({ length: rangeLength }, (_, i) => param.minimum + (i * param.step))
-                    options[key] = evenlyDistributedSubset(fullRange, Math.min(maxOptionsPerParam, fullRange.length))
-                    break
-                case 'string':
-                    if (!param.enum) {
-                        throw new Error(`Cannot generate options for strings without enum values (${key})`)
-                    }
-                    options[key] = evenlyDistributedSubset(param.enum, Math.min(maxOptionsPerParam, param.enum))
-                    break
-                default:
-                    if (param.default) {
-                        options[key] = [param.default]
-                    } else {
-                        throw new Error(`Cannot generate options for param type ${param.type} (${key})`)
-                    }
-            }
-            // Parameters that defined by schemas.
-        } else if (param.$ref) {
+        // Parameters that defined by schemas.
+        if (param.$ref) {
             const vertices = [[0, 0], [40, 0], [40, 40], [0, 40]].map(([x, y]) => ({ X: x, Y: y, Z: 0 }))
             switch (param.$ref) {
                 case 'https://hypar.io/Schemas/Geometry/Polyline.json':
@@ -146,6 +122,30 @@ if (configFile.inputs) {
                     break
                 default:
                     throw new Error(`Cannot generate options for param type ${param.$ref} (${key})`)
+            }
+        } else if (param.type) {
+            // Parameters that are built-in like number and string.
+            switch (param.type) {
+                case 'boolean':
+                    options[key] = [true, false]
+                    break
+                case 'number':
+                    const rangeLength = Math.floor((param.maximum - param.minimum) / param.step) + 1
+                    const fullRange = Array.from({ length: rangeLength }, (_, i) => param.minimum + (i * param.step))
+                    options[key] = evenlyDistributedSubset(fullRange, Math.min(maxOptionsPerParam, fullRange.length))
+                    break
+                case 'string':
+                    if (!param.enum) {
+                        throw new Error(`Cannot generate options for strings without enum values (${key})`)
+                    }
+                    options[key] = evenlyDistributedSubset(param.enum, Math.min(maxOptionsPerParam, param.enum))
+                    break
+                default:
+                    if (param.default) {
+                        options[key] = [param.default]
+                    } else {
+                        throw new Error(`Cannot generate options for param type ${param.type} (${key})`)
+                    }
             }
         }
     })
