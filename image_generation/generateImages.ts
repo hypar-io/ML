@@ -94,8 +94,7 @@ const screenshotGltf = async (glbName: string, targetName: string) => {
 
 		const glbNames = [glbName, ...backgroundGlbs]
 		const glbUrls = glbNames.map((name) => `http://localhost:${glbServerPort}/${name}`)
-		console.log(`http://localhost:8080/render?url=${glbUrls.join(';')}&direction=${cameraAngle}`)
-		await page.goto(`http://localhost:8080/render?url=${glbUrls.join(';')}&direction=${cameraAngle}`)
+		await page.goto(`https://hypar.io/render?url=${glbUrls.join(';')}&direction=${cameraAngle}`)
 	})
 }
 
