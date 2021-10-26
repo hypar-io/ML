@@ -1,15 +1,19 @@
-import { exit } from "process"
-
 const { exec, execSync } = require('child_process')
 const fs = require('fs')
 const path = require('path')
+const { program } = require('commander')
 const puppeteer = require('puppeteer')
 
-const args = process.argv.slice(2)
-if (args.length < 2) {
-	console.error('Must provide a directory of .glb files and an output directory')
-	process.exit()
-}
+program
+	.option('--background-glbs <filenames...>', 'GLB files in input-directory to include in every screenshot')
+	.option('--angle <angle>', 'a camera angle for the screenshot, as comma-separated dimensions: 1,0.1,0.1')
+	.argument('<input-directory>', 'directory containing .glb files, each to be rendered as a separate screenshot')
+	.argument('<output-directory>', 'output directory where screenshots will be stored')
+program.parse(process.argv)
+
+const args = program.args
+const options = program.opts()
+const cameraAngle = options.angle ?? '1,0.1,0.1'
 
 const inputDirectory = path.resolve(args[0])
 if (!fs.existsSync(inputDirectory)) {
@@ -21,7 +25,13 @@ if (!fs.existsSync(outputDirectory)) {
 	fs.mkdirSync(outputDirectory, { recursive: true })
 }
 
-const cameraAngle = args.length > 2 ? args[2] : '1,0.1,0.1'
+const backgroundGlbs = options.backgroundGlbs ?? []
+backgroundGlbs.forEach((glb) => {
+	if (!fs.existsSync(path.join(inputDirectory, glb))) {
+		console.error('background-glb does not exist in input-directory:', glb)
+		process.exit()
+	}
+})
 
 // Start a file server for the GLBs so that the web context can fetch them.
 const serverPath = path.resolve('cors_simple_server.py')
@@ -39,7 +49,7 @@ exec(`python ${serverPath} ${glbServerPort}`, (err, stdout, stderr) => {
 })
 console.log(`GLB server listening on port ${glbServerPort}`)
 
-// Use a headless web browser to render each GLB through Hypar's rendering engine and take a screenshot. 
+// Use a headless web browser to render each GLB through Hypar's rendering engine and take a screenshot.
 const width = 256
 const height = 256
 let browser = null
@@ -82,7 +92,10 @@ const screenshotGltf = async (glbName: string, targetName: string) => {
 			})
 		})
 
-		await page.goto(`https://hypar.io/render?url=http://localhost:${glbServerPort}/${glbName}&direction=${cameraAngle}`)
+		const glbNames = [glbName, ...backgroundGlbs]
+		const glbUrls = glbNames.map((name) => `http://localhost:${glbServerPort}/${name}`)
+		console.log(`http://localhost:8080/render?url=${glbUrls.join(';')}&direction=${cameraAngle}`)
+		await page.goto(`http://localhost:8080/render?url=${glbUrls.join(';')}&direction=${cameraAngle}`)
 	})
 }
 
@@ -104,8 +117,10 @@ const processFile = (filePath: string) => {
 
 async function processAllFiles(files) {
 	for (const file of files) {
-		await processFile(file)
+		if (!backgroundGlbs.includes(file)) {
+			await processFile(file)
+		}
 	}
 }
 const files = fs.readdirSync(inputDirectory).filter((fileInDir) => path.extname(fileInDir) == '.glb')
-processAllFiles(files)
+processAllFiles(files).finally(() => process.exit())
