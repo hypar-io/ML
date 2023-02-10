@@ -130,8 +130,8 @@ if (configFile.inputs) {
                     options[key] = [true, false]
                     break
                 case 'number':
-                    const rangeLength = Math.floor((param.maximum - param.minimum) / param.step) + 1
-                    const fullRange = Array.from({ length: rangeLength }, (_, i) => param.minimum + (i * param.step))
+                    const rangeLength = Math.floor((param.maximum - param.minimum) / param.multipleOf) + 1
+                    const fullRange = Array.from({ length: rangeLength }, (_, i) => param.minimum + (i * param.multipleOf))
                     options[key] = evenlyDistributedSubset(fullRange, Math.min(maxOptionsPerParam, fullRange.length))
                     break
                 case 'string':
